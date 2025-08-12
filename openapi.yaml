@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Character Counter API
+  version: 1.0.0
+  description: Accurate character counting using Python 3 len() (code points), with optional bytes and graphemes.
+servers:
+  - url: https://REPLACE-WITH-YOUR-RENDER-URL
+paths:
+  /count:
+    post:
+      operationId: countCharacters
+      summary: Count characters accurately (Python len) with optional byte and grapheme counts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountRequest'
+      responses:
+        '200':
+          description: Counts computed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    CountRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        include:
+          type: array
+          items:
+            type: string
+            enum: [pythonLen, bytes, graphemes]
+          description: Defaults to ["pythonLen"] if omitted.
+        encoding:
+          type: string
+          default: utf-8
+        normalize:
+          type: string
+          enum: [NFC, NFD, NFKC, NFKD]
+    CountResponse:
+      type: object
+      required: [text, results]
+      properties:
+        text:
+          type: string
+        results:
+          type: object
+          properties:
+            pythonLen:
+              type: integer
+              minimum: 0
+            bytes:
+              type: object
+              properties:
+                value:
+                  type: integer
+                  minimum: 0
+                encoding:
+                  type: string
+            graphemes:
+              type: integer
+              minimum: 0
+        normalization:
+          type: object
+          properties:
+            applied:
+              type: boolean
+            form:
+              type: string
+              enum: [NFC, NFD, NFKC, NFKD]
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
